@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { adminClient } from '@/lib/supabase/admin';
 import { createRequestSchema } from '@/lib/validations/request.schema';
-import { sendRequestConfirmation } from '@/lib/actions/email.actions';
+import { dispatchNotification } from '@/lib/actions/notification.actions';
 import type { RequestFilters } from '@/types';
 
 // -----------------------------------------------
@@ -18,15 +18,18 @@ export async function GET(request: NextRequest) {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role_id, roles(name)')
+      .select('role_id')
       .eq('id', user.id)
       .single();
-    const role = (profile?.roles as unknown as { name: string } | null)?.name ?? 'student';
+    
+    const ROLE_MAP: Record<number, string> = { 1: 'student', 2: 'maintenance_officer', 3: 'admin' };
+    const role = ROLE_MAP[profile?.role_id as number] ?? 'student';
 
     const { searchParams } = new URL(request.url);
+    const categoryParam = searchParams.get('category');
     const filters: RequestFilters = {
       status: (searchParams.get('status') as RequestFilters['status']) ?? 'all',
-      category: searchParams.get('category') ? Number(searchParams.get('category')) : 'all',
+      category: (categoryParam && categoryParam !== 'all') ? Number(categoryParam) : 'all',
       priority: (searchParams.get('priority') as RequestFilters['priority']) ?? 'all',
       search: searchParams.get('search') ?? '',
       page: Number(searchParams.get('page') ?? 1),
@@ -41,9 +44,9 @@ export async function GET(request: NextRequest) {
       .from('service_requests')
       .select(`
         *,
-        profiles!requester_id(id, full_name, email, department),
+        profiles!service_requests_requester_id_fkey(id, full_name, email, department),
         request_categories(id, name, icon),
-        assignments(id, officer_id, assigned_at, notes, profiles!officer_id(full_name, email))
+        assignments(id, officer_id, assigned_at, notes, profiles!assignments_officer_id_fkey(full_name, email))
       `, { count: 'exact' });
 
     // Role-based scoping
@@ -61,6 +64,9 @@ export async function GET(request: NextRequest) {
     // admin sees all
 
     // Apply filters
+    const userId = searchParams.get('userId');
+    if (role === 'admin' && userId) query = query.eq('requester_id', userId);
+    
     if (filters.status && filters.status !== 'all') query = query.eq('status', filters.status);
     if (filters.category && filters.category !== 'all') query = query.eq('category_id', filters.category);
     if (filters.priority && filters.priority !== 'all') query = query.eq('priority', filters.priority);
@@ -118,8 +124,28 @@ export async function POST(request: NextRequest) {
       remarks: 'Request submitted',
     });
 
-    // Trigger confirmation email (non-blocking)
-    sendRequestConfirmation(data.id).catch(console.error);
+    // Trigger notification for Student
+    dispatchNotification({
+      userId: user.id,
+      title: 'Request Submitted',
+      message: `Your request "${data.title}" has been received.`,
+      type: 'request_created',
+      link: `/student/requests`,
+      sendEmail: true,
+      requestId: data.id,
+    });
+
+    // Trigger notification for Admins
+    const { data: admins } = await adminClient.from('profiles').select('id').eq('role_id', 3);
+    admins?.forEach(admin => {
+      dispatchNotification({
+        userId: admin.id,
+        title: 'New Request Received',
+        message: `A new request "${data.title}" was submitted.`,
+        type: 'request_created',
+        link: `/admin/requests`,
+      });
+    });
 
     return NextResponse.json({ data }, { status: 201 });
   } catch (err) {

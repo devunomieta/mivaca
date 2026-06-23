@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { adminClient } from '@/lib/supabase/admin';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { StatusBadge, PriorityBadge } from '@/components/dashboard/StatusBadge';
+import { generateRequestSlug } from '@/lib/utils/slug';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, ClipboardList, Clock, CheckCircle2, Loader2, AlertTriangle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -91,7 +92,7 @@ export default async function StudentDashboardPage() {
             {requests.map((req: any) => (
               <li key={req.id}>
                 <Link
-                  href={`/student/requests/${req.id}`}
+                  href={`/student/requests/${generateRequestSlug(req)}`}
                   className="flex items-center justify-between px-6 py-4 hover:bg-brand-canvas transition-colors group"
                 >
                   <div className="flex-1 min-w-0 mr-4">

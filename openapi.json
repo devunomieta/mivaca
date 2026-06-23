@@ -242,6 +242,61 @@
           "403": { "description": "Forbidden — Admin only" }
         }
       }
+    },
+    "/requests/stats": {
+      "get": {
+        "tags": ["Service Requests"],
+        "summary": "Get request statistics",
+        "description": "Returns counts for pending, assigned, in_progress, and completed requests.",
+        "responses": {
+          "200": { "description": "Statistics object" }
+        }
+      }
+    },
+    "/requests/{id}/comments": {
+      "get": {
+        "tags": ["Comments"],
+        "summary": "List comments for a request",
+        "description": "Fetches all comments/messages for a specific request. Internal comments are only visible to officers and admins.",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+        "responses": { "200": { "description": "List of comments" } }
+      },
+      "post": {
+        "tags": ["Comments"],
+        "summary": "Add a comment",
+        "description": "Adds a new message to the request. Supports internal notes and file attachments.",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "content": { "type": "string" }, "is_internal": { "type": "boolean" }, "attachments": { "type": "array", "items": { "type": "string" } } } } } }
+        },
+        "responses": { "201": { "description": "Comment added" } }
+      }
+    },
+    "/categories": {
+      "get": {
+        "tags": ["Categories"],
+        "summary": "List request categories",
+        "responses": { "200": { "description": "List of categories" } }
+      },
+      "post": {
+        "tags": ["Categories"],
+        "summary": "Create category (Admin only)",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "properties": { "name": { "type": "string" }, "description": { "type": "string" } } } } } },
+        "responses": { "201": { "description": "Category created" } }
+      }
+    },
+    "/notifications": {
+      "get": {
+        "tags": ["Notifications"],
+        "summary": "Get user notifications",
+        "responses": { "200": { "description": "List of notifications" } }
+      },
+      "patch": {
+        "tags": ["Notifications"],
+        "summary": "Mark notifications as read",
+        "responses": { "200": { "description": "Notifications updated" } }
+      }
     }
   }
 }

@@ -58,3 +58,6 @@ AGENTS.md
 CLAUDE.md
 .gemini/
 .cursorrules
+
+# Local Debug Scripts
+debug.mjs

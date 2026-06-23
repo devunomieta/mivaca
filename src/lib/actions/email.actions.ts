@@ -135,6 +135,7 @@ export async function sendStatusUpdateAlert(
       remarks,
       updatedAt: formatDate(new Date().toISOString()),
       appUrl: APP_URL,
+      requestId: request.id,
     }));
 
     const { error } = await resend.emails.send({

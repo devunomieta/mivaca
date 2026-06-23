@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { StatusBadge, PriorityBadge } from '@/components/dashboard/StatusBadge';
 import { formatDistanceToNow } from 'date-fns';
+import { generateRequestSlug } from '@/lib/utils/slug';
 import Link from 'next/link';
 import type { ServiceRequest } from '@/types';
 
@@ -134,12 +135,12 @@ export default function OfficerRequestsPage() {
                   return (
                     <tr key={req.id} id={`row-${req.id}`} className="hover:bg-brand-canvas/50 transition-colors">
                       <td className="px-4 py-3 text-xs font-mono text-brand-gray">
-                        <Link href={`/officer/requests/${req.id}`} className="hover:text-brand-coral transition-colors">
+                        <Link href={`/officer/requests/${generateRequestSlug(req)}`} className="hover:text-brand-coral transition-colors">
                           #{req.id.slice(0, 8).toUpperCase()}
                         </Link>
                       </td>
                       <td className="px-4 py-3 max-w-[200px]">
-                        <Link href={`/officer/requests/${req.id}`}>
+                        <Link href={`/officer/requests/${generateRequestSlug(req)}`}>
                           <p className="text-sm font-medium text-brand-navy truncate hover:text-brand-coral transition-colors">{req.title}</p>
                         </Link>
                       </td>

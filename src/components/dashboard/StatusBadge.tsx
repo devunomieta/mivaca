@@ -57,7 +57,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
   return (
     <Badge
       variant="outline"
-      className={cn('text-xs font-medium border', config.className, className)}
+      className={cn('text-xs font-medium border whitespace-nowrap', config.className, className)}
     >
       {config.label}
     </Badge>
@@ -74,7 +74,7 @@ export function PriorityBadge({ priority, className }: PriorityBadgeProps) {
   return (
     <Badge
       variant="outline"
-      className={cn('text-xs font-medium border', config.className, className)}
+      className={cn('text-xs font-medium border whitespace-nowrap', config.className, className)}
     >
       {config.label}
     </Badge>

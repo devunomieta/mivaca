@@ -7,6 +7,7 @@ import { Search, ChevronLeft, ChevronRight, X, AlertTriangle } from 'lucide-reac
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { StatusBadge, PriorityBadge } from '@/components/dashboard/StatusBadge';
+import { generateRequestSlug } from '@/lib/utils/slug';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import type { ServiceRequest } from '@/types';
@@ -139,12 +140,12 @@ export default function StudentRequestsPage() {
                   return (
                     <tr key={req.id} id={`row-${req.id}`} className="hover:bg-brand-canvas/50 transition-colors">
                       <td className="px-4 py-3 text-xs font-mono text-brand-gray">
-                        <Link href={`/student/requests/${req.id}`} className="hover:text-brand-coral transition-colors">
+                        <Link href={`/student/requests/${generateRequestSlug(req)}`} className="hover:text-brand-coral transition-colors">
                           #{req.id.slice(0, 8).toUpperCase()}
                         </Link>
                       </td>
                       <td className="px-4 py-3 max-w-[250px]">
-                        <Link href={`/student/requests/${req.id}`}>
+                        <Link href={`/student/requests/${generateRequestSlug(req)}`}>
                           <p className="text-sm font-medium text-brand-navy truncate hover:text-brand-coral transition-colors">{req.title}</p>
                         </Link>
                       </td>

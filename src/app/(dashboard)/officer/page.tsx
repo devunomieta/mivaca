@@ -6,6 +6,7 @@ import { StatsCard } from '@/components/dashboard/StatsCard';
 import { StatusBadge, PriorityBadge } from '@/components/dashboard/StatusBadge';
 import { Wrench, Clock, CheckCircle2, ClipboardList, MapPin, User, AlertTriangle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { generateRequestSlug } from '@/lib/utils/slug';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'My Tasks' };
@@ -84,7 +85,7 @@ export default async function OfficerDashboardPage() {
             {activeTasks.map((req: any) => (
               <li key={req.id}>
                 <Link
-                  href={`/officer/requests/${req.id}`}
+                  href={`/officer/requests/${generateRequestSlug(req)}`}
                   className="block px-6 py-4 hover:bg-brand-canvas transition-colors group"
                 >
                   <div className="flex items-start justify-between gap-4">

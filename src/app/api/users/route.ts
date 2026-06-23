@@ -11,8 +11,9 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const profile = await adminClient.from('profiles').select('role_id, roles(name)').eq('id', user.id).single();
-    const roleName = (profile.data?.roles as unknown as { name: string } | null)?.name ?? 'student';
+    const profile = await adminClient.from('profiles').select('role_id').eq('id', user.id).single();
+    const ROLE_MAP: Record<number, string> = { 1: 'student', 2: 'maintenance_officer', 3: 'admin' };
+    const roleName = ROLE_MAP[profile.data?.role_id as number] ?? 'student';
     if (roleName !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { searchParams } = new URL(request.url);

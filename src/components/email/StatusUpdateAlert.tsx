@@ -11,6 +11,7 @@ interface StatusUpdateAlertProps {
   remarks?: string;
   updatedAt: string;
   appUrl: string;
+  requestId: number | string;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -30,7 +31,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export function StatusUpdateAlertEmail({
-  studentName, requestTitle, oldStatus, newStatus, officerName, remarks, updatedAt, appUrl,
+  studentName, requestTitle, oldStatus, newStatus, officerName, remarks, updatedAt, appUrl, requestId
 }: StatusUpdateAlertProps) {
   const statusColor = STATUS_COLORS[newStatus] ?? '#051026';
   const statusLabel = STATUS_LABELS[newStatus] ?? newStatus;
@@ -96,8 +97,11 @@ export function StatusUpdateAlertEmail({
               </Section>
             )}
 
+            <Text style={{ color: '#374151', fontSize: '15px', lineHeight: '1.6', margin: '0 0 24px' }}>
+              Log in to the portal to view the latest updates on your request and communicate directly with the team.
+            </Text>
             <Button style={{ backgroundColor: '#FF5A36', color: '#FFFFFF', borderRadius: '8px', padding: '14px 28px', fontWeight: '600', fontSize: '15px', textDecoration: 'none', display: 'inline-block' }}
-              href={`${appUrl}/student`}>
+              href={`${appUrl}/student/requests/${requestId}`}>
               View Request Details
             </Button>
           </Section>

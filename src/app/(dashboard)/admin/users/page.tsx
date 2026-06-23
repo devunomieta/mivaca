@@ -3,10 +3,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Search, ChevronLeft, ChevronRight, X, User } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, X, User, Eye, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { formatDistanceToNow } from 'date-fns';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/dialog';
+import { StatusBadge, PriorityBadge } from '@/components/dashboard/StatusBadge';
+import { formatDistanceToNow, format } from 'date-fns';
 import type { Profile } from '@/types';
 
 const ROLE_TABS = [
@@ -29,6 +33,24 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  const [viewingUser, setViewingUser] = useState<any | null>(null);
+  const [userRequests, setUserRequests] = useState<any[]>([]);
+  const [userRequestsLoading, setUserRequestsLoading] = useState(false);
+
+  // Fetch user specific requests when viewing user
+  useEffect(() => {
+    if (viewingUser) {
+      setUserRequestsLoading(true);
+      fetch(`/api/requests?userId=${viewingUser.id}&limit=50&sort=created_at&order=desc`)
+        .then((res) => res.json())
+        .then((json) => setUserRequests(json.data ?? []))
+        .catch(() => toast.error("Failed to load user's request history"))
+        .finally(() => setUserRequestsLoading(false));
+    } else {
+      setUserRequests([]);
+    }
+  }, [viewingUser]);
 
   // Debounce search
   useEffect(() => {
@@ -118,7 +140,7 @@ export default function AdminUsersPage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-brand-canvas border-b border-border">
-                  {['Name', 'Email', 'Role', 'Department', 'Phone', 'Status', 'Joined'].map((h) => (
+                  {['Name', 'Email', 'Role', 'Department', 'Status', 'Joined', 'Actions'].map((h) => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-brand-gray uppercase tracking-wider whitespace-nowrap">
                       {h}
                     </th>
@@ -147,9 +169,6 @@ export default function AdminUsersPage() {
                       <td className="px-4 py-3 text-sm text-brand-gray whitespace-nowrap">
                         {u.department || '—'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-brand-gray whitespace-nowrap">
-                        {u.phone || '—'}
-                      </td>
                       <td className="px-4 py-3">
                         <span className={`text-xs font-semibold px-2 py-1 rounded-full ${u.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
                           {u.is_active ? 'Active' : 'Inactive'}
@@ -157,6 +176,11 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-4 py-3 text-xs text-brand-gray whitespace-nowrap">
                         {formatDistanceToNow(new Date(u.created_at), { addSuffix: true })}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Button size="icon" variant="ghost" onClick={() => setViewingUser(u)} className="h-7 w-7 text-brand-gray hover:text-brand-navy">
+                          <Eye className="w-4 h-4" />
+                        </Button>
                       </td>
                     </tr>
                   );
@@ -185,6 +209,92 @@ export default function AdminUsersPage() {
           </div>
         )}
       </div>
+      {/* User Details & History Modal */}
+      <Dialog open={!!viewingUser} onOpenChange={(open) => !open && setViewingUser(null)}>
+        <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-hidden flex flex-col p-0 gap-0">
+          <DialogHeader className="px-6 py-4 border-b border-border bg-brand-canvas shrink-0">
+            <DialogTitle className="text-brand-navy flex items-center gap-3">
+              User Details
+              <span className={`text-xs font-semibold px-2 py-1 rounded-full capitalize ${
+                viewingUser?.roles?.name === 'admin' ? 'bg-purple-100 text-purple-700' :
+                viewingUser?.roles?.name === 'maintenance_officer' ? 'bg-blue-100 text-blue-700' :
+                'bg-gray-100 text-gray-700'
+              }`}>
+                {viewingUser?.roles?.name?.replace('_', ' ')}
+              </span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          {viewingUser && (
+            <div className="flex-1 overflow-y-auto">
+              <div className="px-6 py-5 space-y-6">
+                {/* Profile Section */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs font-semibold text-brand-gray uppercase tracking-wider mb-1">Full Name</p>
+                    <p className="text-sm font-medium text-brand-navy">{viewingUser.full_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-brand-gray uppercase tracking-wider mb-1">Email</p>
+                    <p className="text-sm font-medium text-brand-navy">{viewingUser.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-brand-gray uppercase tracking-wider mb-1">Department</p>
+                    <p className="text-sm font-medium text-brand-navy">{viewingUser.department || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-brand-gray uppercase tracking-wider mb-1">Phone</p>
+                    <p className="text-sm font-medium text-brand-navy">{viewingUser.phone || '—'}</p>
+                  </div>
+                </div>
+
+                <hr className="border-border" />
+
+                {/* Request History Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-brand-navy mb-3 flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-brand-coral" />
+                    Request History
+                  </h3>
+                  
+                  {userRequestsLoading ? (
+                    <div className="flex justify-center py-8">
+                      <div className="w-5 h-5 border-2 border-brand-coral border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  ) : userRequests.length === 0 ? (
+                    <div className="bg-brand-canvas border border-border rounded-lg p-6 text-center">
+                      <p className="text-sm text-brand-gray">No request history found for this user.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {userRequests.map((req) => (
+                        <div key={req.id} className="bg-white border border-border rounded-lg p-4 hover:border-brand-coral/50 transition-colors">
+                          <div className="flex justify-between items-start gap-4 mb-2">
+                            <div>
+                              <p className="text-sm font-medium text-brand-navy">{req.title}</p>
+                              <p className="text-xs text-brand-gray mt-0.5">{req.location}</p>
+                            </div>
+                            <div className="flex gap-2 shrink-0">
+                              <PriorityBadge priority={req.priority} />
+                              <StatusBadge status={req.status} />
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center mt-3 pt-3 border-t border-border border-dashed">
+                            <p className="text-xs font-mono text-brand-gray">#{req.id.slice(0, 8).toUpperCase()}</p>
+                            <p className="text-xs text-brand-gray">
+                              {format(new Date(req.created_at), 'MMM d, yyyy h:mm a')}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -25,9 +25,9 @@ export async function GET(request: NextRequest) {
       .from('service_requests')
       .select(`
         *,
-        profiles!requester_id(full_name, email),
+        profiles!service_requests_requester_id_fkey(full_name, email),
         request_categories(name),
-        assignments(officer_id, profiles!officer_id(full_name))
+        assignments(officer_id, profiles!assignments_officer_id_fkey(full_name))
       `)
       .order('created_at', { ascending: false });
 

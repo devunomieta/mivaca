@@ -27,7 +27,7 @@ export const createRequestSchema = z.object({
 
 export const updateRequestSchema = z.object({
   status: z
-    .enum(['pending', 'assigned', 'in_progress', 'completed', 'cancelled'])
+    .enum(['pending', 'assigned', 'in_progress', 'completed', 'cancelled', 'rejected'])
     .optional(),
   title: z.string().min(5).max(150).optional(),
   description: z.string().min(20).max(2000).optional(),
@@ -41,7 +41,7 @@ export const assignRequestSchema = z.object({
 
 export const statusUpdateSchema = z.object({
   request_id: z.string().uuid(),
-  new_status: z.enum(['pending', 'assigned', 'in_progress', 'completed', 'cancelled']),
+  new_status: z.enum(['pending', 'assigned', 'in_progress', 'completed', 'cancelled', 'rejected']),
   remarks: z.string().max(500).optional(),
 });
 

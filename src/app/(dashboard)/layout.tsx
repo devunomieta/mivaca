@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { Sidebar } from '@/components/dashboard/Sidebar';
+import { DashboardShell } from '@/components/layout/DashboardShell';
+import { getSiteSettingsAction } from '@/lib/actions/settings.actions';
 import type { Metadata } from 'next';
 import type { Role } from '@/types';
 
@@ -29,14 +30,11 @@ export default async function DashboardLayout({
 
   if (!profile) redirect('/login');
 
+  const settings = await getSiteSettingsAction();
+
   return (
-    <div className="flex h-screen bg-brand-canvas overflow-hidden">
-      <Sidebar profile={profile as any} />
-      <main className="flex-1 ml-64 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-6 py-8 animate-fade-in">
-          {children}
-        </div>
-      </main>
-    </div>
+    <DashboardShell profile={profile as any} settings={settings}>
+      {children}
+    </DashboardShell>
   );
 }

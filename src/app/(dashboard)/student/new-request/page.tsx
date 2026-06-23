@@ -4,11 +4,12 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'sonner';
-import { Loader2, Upload, X, ArrowLeft, ArrowRight, CheckCircle2, Zap, Droplets, Armchair, Wifi, Monitor, Building2 } from 'lucide-react';
+import { Loader2, Upload, X, ArrowLeft, ArrowRight, CheckCircle2, Zap, Droplets, Armchair, Wifi, Monitor, Building2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { createClient } from '@/lib/supabase/client';
 import { validateFile } from '@/lib/validations/request.schema';
 import type { Metadata } from 'next';
@@ -49,10 +50,16 @@ export default function NewRequestPage() {
   const [uploadedFiles, setUploadedFiles] = useState<{ name: string; url: string }[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    if (acceptedFiles.length + uploadedFiles.length > 5) {
+      toast.error(`You can only attach up to 5 files total. You have ${uploadedFiles.length} attached.`);
+      return; // Stop the upload entirely
+    }
     for (const file of acceptedFiles) {
       const err = validateFile(file);
-      if (err) { toast.error(err); continue; }
+      if (err) { toast.error(err); return; }
     }
 
     setUploadingFiles(true);
@@ -60,7 +67,7 @@ export default function NewRequestPage() {
     if (!user) { toast.error('Please sign in again.'); setUploadingFiles(false); return; }
 
     const uploaded: { name: string; url: string }[] = [];
-    for (const file of acceptedFiles.slice(0, 5 - uploadedFiles.length)) {
+    for (const file of acceptedFiles) {
       const path = `${user.id}/${Date.now()}-${file.name.replace(/[^a-z0-9.]/gi, '_')}`;
       const { error } = await supabase.storage.from('request-evidence').upload(path, file);
       if (error) { toast.error(`Failed to upload ${file.name}`); continue; }
@@ -77,8 +84,17 @@ export default function NewRequestPage() {
     if (uploaded.length > 0) toast.success(`${uploaded.length} file(s) uploaded`);
   }, [uploadedFiles, supabase]);
 
+  const onDropRejected = useCallback((fileRejections: any[]) => {
+    if (fileRejections.length > 5) {
+       toast.error('You cannot select more than 5 files at a time.');
+    } else {
+       toast.error('Some files were rejected. Ensure they are images or PDFs under 5MB.');
+    }
+  }, []);
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
+    onDropRejected,
     accept: { 'image/*': [], 'application/pdf': [] },
     maxFiles: 5,
     disabled: uploadedFiles.length >= 5,
@@ -264,14 +280,19 @@ export default function NewRequestPage() {
                 {uploadedFiles.map((f, i) => (
                   <li key={i} className="flex items-center justify-between bg-brand-canvas rounded-lg px-4 py-2.5 border border-border">
                     <span className="text-sm text-brand-navy truncate flex-1">{f.name}</span>
-                    <button type="button"
-                      onClick={() => {
-                        setUploadedFiles((prev) => prev.filter((_, idx) => idx !== i));
-                        setForm((prev) => ({ ...prev, evidence_urls: prev.evidence_urls.filter((_, idx) => idx !== i) }));
-                      }}
-                      className="text-brand-gray hover:text-red-500 transition-colors ml-3 flex-shrink-0">
-                      <X className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1 ml-3 flex-shrink-0">
+                      <button type="button" onClick={() => setPreviewImage(f.url)} className="p-1.5 text-brand-gray hover:text-brand-navy transition-colors rounded-md hover:bg-black/5">
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button type="button"
+                        onClick={() => {
+                          setUploadedFiles((prev) => prev.filter((_, idx) => idx !== i));
+                          setForm((prev) => ({ ...prev, evidence_urls: prev.evidence_urls.filter((_, idx) => idx !== i) }));
+                        }}
+                        className="p-1.5 text-brand-gray hover:text-red-500 transition-colors rounded-md hover:bg-red-50">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -328,6 +349,17 @@ export default function NewRequestPage() {
           )}
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/5 border-none shadow-none">
+          {previewImage?.endsWith('.pdf') ? (
+            <iframe src={previewImage} className="w-full h-[80vh] rounded-xl" />
+          ) : (
+            <img src={previewImage || ''} alt="Preview" className="w-full h-auto max-h-[85vh] object-contain" />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
