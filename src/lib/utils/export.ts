@@ -42,7 +42,13 @@ export function exportRequestsToCSV(requests: ServiceRequest[]): string {
     }),
   }));
 
-  return Papa.unparse(rows);
+  return Papa.unparse({
+    fields: [
+      'Reference ID', 'Title', 'Category', 'Requester', 'Requester Email', 
+      'Location', 'Priority', 'Status', 'Assigned Officer', 'Submitted Date', 'Last Updated'
+    ],
+    data: rows
+  });
 }
 
 export function downloadCSV(csvString: string, filename: string): void {
