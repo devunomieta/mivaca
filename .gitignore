@@ -52,3 +52,9 @@ playwright-report/
 playwright/.cache/
 test-results/
 vitest.config.*
+
+# AI & IDE Context Files
+AGENTS.md
+CLAUDE.md
+.gemini/
+.cursorrules

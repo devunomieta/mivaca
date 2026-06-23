@@ -150,3 +150,16 @@ export interface AdminStats extends RequestStats {
   total_officers: number;
   total_students: number;
 }
+
+// -----------------------------------------------
+// Site Settings Types
+// -----------------------------------------------
+
+export interface SiteSettings {
+  id: string;
+  logo_url: string;
+  favicon_url: string;
+  auth_image_url: string;
+  allow_registration: boolean;
+  updated_at: string;
+}

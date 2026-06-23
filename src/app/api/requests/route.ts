@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       .select('role_id, roles(name)')
       .eq('id', user.id)
       .single();
-    const role = (profile?.roles as { name: string } | null)?.name ?? 'student';
+    const role = (profile?.roles as unknown as { name: string } | null)?.name ?? 'student';
 
     const { searchParams } = new URL(request.url);
     const filters: RequestFilters = {
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const result = createRequestSchema.safeParse(body);
     if (!result.success) {
-      return NextResponse.json({ error: result.error.errors[0].message }, { status: 400 });
+      return NextResponse.json({ error: result.error.issues[0].message }, { status: 400 });
     }
 
     const { data, error } = await adminClient

@@ -12,7 +12,7 @@ export const createRequestSchema = z.object({
     .min(20, 'Description must be at least 20 characters')
     .max(2000, 'Description must not exceed 2000 characters'),
   category_id: z
-    .number({ required_error: 'Please select a category' })
+    .number({ message: 'Please select a category' })
     .int()
     .positive('Please select a valid category'),
   location: z
@@ -20,7 +20,7 @@ export const createRequestSchema = z.object({
     .min(3, 'Location must be at least 3 characters')
     .max(200, 'Location must not exceed 200 characters'),
   priority: z.enum(['low', 'medium', 'high', 'critical'], {
-    required_error: 'Please select a priority level',
+    message: 'Please select a priority level',
   }),
   evidence_urls: z.array(z.string().url()).max(5, 'Maximum 5 files allowed').optional(),
 });

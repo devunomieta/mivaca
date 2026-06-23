@@ -9,8 +9,12 @@ const ROLE_ROUTES: Record<Role, string> = {
   admin: '/admin',
 };
 
-export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+export default async function proxy(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -24,7 +28,11 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          supabaseResponse = NextResponse.next({ request });
+          supabaseResponse = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );
@@ -60,27 +68,29 @@ export async function middleware(request: NextRequest) {
 
   // Logged in — redirect away from auth pages
   if (user && (pathname === '/login' || pathname === '/register')) {
-    // Fetch role and redirect to correct dashboard
+    // Fetch role_id and redirect to correct dashboard
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role_id, roles(name)')
+      .select('role_id')
       .eq('id', user.id)
       .single();
 
-    const roleName = (profile?.roles as { name: Role } | null)?.name ?? 'student';
-    return NextResponse.redirect(new URL(ROLE_ROUTES[roleName], request.url));
+    const roleId = profile?.role_id ?? 1;
+    const ROLE_ROUTES_BY_ID: Record<number, string> = { 1: '/student', 2: '/officer', 3: '/admin' };
+    return NextResponse.redirect(new URL(ROLE_ROUTES_BY_ID[roleId] ?? '/student', request.url));
   }
 
   // Role-based route protection
   if (user && isDashboardRoute) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role_id, roles(name)')
+      .select('role_id')
       .eq('id', user.id)
       .single();
 
-    const roleName = (profile?.roles as { name: Role } | null)?.name ?? 'student';
-    const allowedBase = ROLE_ROUTES[roleName];
+    const roleId = profile?.role_id ?? 1;
+    const ROLE_ROUTES_BY_ID: Record<number, string> = { 1: '/student', 2: '/officer', 3: '/admin' };
+    const allowedBase = ROLE_ROUTES_BY_ID[roleId] ?? '/student';
 
     if (!pathname.startsWith(allowedBase)) {
       return NextResponse.redirect(new URL(allowedBase, request.url));

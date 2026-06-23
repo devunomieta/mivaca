@@ -1,26 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
+@config "../../tailwind.config.ts";
+@import "tw-animate-css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Miva Brand Token System */
+  --brand-navy: #051026;
+  --brand-coral: #FF5A36;
+  --brand-canvas: #F8F9FA;
+  --brand-white: #FFFFFF;
+  --brand-gray: #6C757D;
+
+  /* Shadcn/ui CSS Variables — mapped to Miva brand */
+  --background: 220 14% 96%;       /* F8F9FA canvas */
+  --foreground: 222 71% 9%;        /* 051026 navy */
+  --card: 0 0% 100%;               /* pure white */
+  --card-foreground: 222 71% 9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 71% 9%;
+  --primary: 14 100% 60%;          /* FF5A36 coral */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 14% 96%;
+  --secondary-foreground: 222 71% 9%;
+  --muted: 220 9% 94%;
+  --muted-foreground: 215 13% 44%; /* 6C757D gray */
+  --accent: 14 100% 60%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 220 13% 88%;
+  --input: 220 13% 91%;
+  --ring: 14 100% 60%;
+  --radius: 0.625rem;              /* ~10px — brand spec */
+
+  /* Status Colors */
+  --status-pending: #F59E0B;
+  --status-assigned: #3B82F6;
+  --status-in-progress: #8B5CF6;
+  --status-completed: #10B981;
+  --status-cancelled: #6C757D;
+
+  /* Priority Colors */
+  --priority-low: #10B981;
+  --priority-medium: #F59E0B;
+  --priority-high: #FF5A36;
+  --priority-critical: #DC2626;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ---- Base Styles ---- */
+* {
+  box-sizing: border-box;
+  border-color: hsl(var(--border));
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-gray);
+}
+
+/* ---- Focus Ring ---- */
+:focus-visible {
+  outline: 2px solid var(--brand-coral);
+  outline-offset: 2px;
+}
+
+/* ---- Utility Classes ---- */
+.sidebar-nav-item {
+  @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium
+         text-white/60 hover:text-white hover:bg-white/10
+         transition-all duration-200 cursor-pointer;
+}
+
+.sidebar-nav-item.active {
+  @apply text-white bg-brand-coral/90;
+}
+
+.stat-card {
+  @apply bg-white rounded-xl p-6 shadow-card border border-border
+         hover:shadow-card-hover transition-shadow duration-200;
+}
+
+.page-header {
+  @apply flex items-center justify-between mb-6;
+}
+
+.page-title {
+  @apply text-2xl font-bold text-brand-navy;
+}
+
+.badge-pending {
+  @apply bg-amber-100 text-amber-800 border-amber-200;
+}
+.badge-assigned {
+  @apply bg-blue-100 text-blue-800 border-blue-200;
+}
+.badge-in_progress {
+  @apply bg-purple-100 text-purple-800 border-purple-200;
+}
+.badge-completed {
+  @apply bg-emerald-100 text-emerald-800 border-emerald-200;
+}
+.badge-cancelled {
+  @apply bg-gray-100 text-gray-600 border-gray-200;
+}
+
+.badge-low {
+  @apply bg-emerald-100 text-emerald-800 border-emerald-200;
+}
+.badge-medium {
+  @apply bg-amber-100 text-amber-800 border-amber-200;
+}
+.badge-high {
+  @apply bg-orange-100 text-orange-800 border-orange-200;
+}
+.badge-critical {
+  @apply bg-red-100 text-red-800 border-red-200;
+}
+
+/* ---- Animations ---- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
 }

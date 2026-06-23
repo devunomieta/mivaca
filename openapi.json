@@ -1,0 +1,247 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Miva Campus Maintenance API",
+    "description": "RESTful API for the Miva Open University Campus Maintenance Complaint & Service Request Platform. Provides CRUD operations for service requests, user management, task assignment, status logging, and data export.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Miva Open University — Facilities Management",
+      "email": "facilities@miva.edu.ng"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Local Development Server"
+    },
+    {
+      "url": "https://mivaca.vercel.app/api",
+      "description": "Production Server (Vercel)"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Supabase JWT token obtained from auth session"
+      }
+    },
+    "schemas": {
+      "ServiceRequest": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "requester_id": { "type": "string", "format": "uuid" },
+          "category_id": { "type": "integer" },
+          "title": { "type": "string", "maxLength": 150 },
+          "description": { "type": "string", "maxLength": 2000 },
+          "location": { "type": "string" },
+          "priority": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+          "status": { "type": "string", "enum": ["pending", "assigned", "in_progress", "completed", "cancelled"] },
+          "evidence_urls": { "type": "array", "items": { "type": "string", "format": "uri" } },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreateRequestBody": {
+        "type": "object",
+        "required": ["title", "description", "category_id", "location", "priority"],
+        "properties": {
+          "title": { "type": "string", "minLength": 5, "maxLength": 150 },
+          "description": { "type": "string", "minLength": 20, "maxLength": 2000 },
+          "category_id": { "type": "integer" },
+          "location": { "type": "string", "minLength": 3 },
+          "priority": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+          "evidence_urls": { "type": "array", "items": { "type": "string", "format": "uri" }, "maxItems": 5 }
+        }
+      },
+      "AssignRequestBody": {
+        "type": "object",
+        "required": ["officer_id"],
+        "properties": {
+          "officer_id": { "type": "string", "format": "uuid" },
+          "notes": { "type": "string", "maxLength": 500 }
+        }
+      },
+      "StatusLogBody": {
+        "type": "object",
+        "required": ["request_id", "new_status"],
+        "properties": {
+          "request_id": { "type": "string", "format": "uuid" },
+          "new_status": { "type": "string", "enum": ["pending", "assigned", "in_progress", "completed", "cancelled"] },
+          "remarks": { "type": "string", "maxLength": 500 }
+        }
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "full_name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "role_id": { "type": "integer" },
+          "department": { "type": "string", "nullable": true },
+          "phone": { "type": "string", "nullable": true },
+          "is_active": { "type": "boolean" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" }
+        }
+      },
+      "PaginatedRequests": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/ServiceRequest" } },
+          "total": { "type": "integer" },
+          "page": { "type": "integer" },
+          "limit": { "type": "integer" },
+          "totalPages": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "security": [{ "BearerAuth": [] }],
+  "paths": {
+    "/requests": {
+      "get": {
+        "tags": ["Service Requests"],
+        "summary": "List service requests",
+        "description": "Returns a paginated list of service requests filtered by the caller's role. Students see only their own; officers see assigned; admins see all.",
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["all", "pending", "assigned", "in_progress", "completed", "cancelled"] } },
+          { "name": "category", "in": "query", "schema": { "type": "integer" } },
+          { "name": "priority", "in": "query", "schema": { "type": "string", "enum": ["all", "low", "medium", "high", "critical"] } },
+          { "name": "search", "in": "query", "schema": { "type": "string" }, "description": "Search in title, description, and location" },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20, "maximum": 100 } },
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["created_at", "updated_at", "priority"], "default": "created_at" } },
+          { "name": "order", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"], "default": "desc" } }
+        ],
+        "responses": {
+          "200": { "description": "Success", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaginatedRequests" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      },
+      "post": {
+        "tags": ["Service Requests"],
+        "summary": "Create a new service request",
+        "description": "Submits a new maintenance request. Automatically triggers a confirmation email to the requester.",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateRequestBody" } } }
+        },
+        "responses": {
+          "201": { "description": "Created successfully", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/ServiceRequest" } } } } } },
+          "400": { "description": "Validation error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/requests/{id}": {
+      "get": {
+        "tags": ["Service Requests"],
+        "summary": "Get a single request with full detail",
+        "description": "Returns a service request with joined category, requester profile, assignment, and full status log (audit trail).",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+        "responses": {
+          "200": { "description": "Success" },
+          "403": { "description": "Access denied — not the owner, assigned officer, or admin" },
+          "404": { "description": "Not found" }
+        }
+      },
+      "patch": {
+        "tags": ["Service Requests"],
+        "summary": "Update a request (Officer/Admin only)",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "status": { "type": "string" }, "priority": { "type": "string" } } } } }
+        },
+        "responses": {
+          "200": { "description": "Updated" },
+          "403": { "description": "Forbidden" }
+        }
+      },
+      "delete": {
+        "tags": ["Service Requests"],
+        "summary": "Cancel a request (Admin only)",
+        "description": "Soft-deletes the request by setting its status to 'cancelled'.",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+        "responses": {
+          "200": { "description": "Cancelled" },
+          "403": { "description": "Forbidden — Admin only" }
+        }
+      }
+    },
+    "/requests/{id}/assign": {
+      "post": {
+        "tags": ["Assignments"],
+        "summary": "Assign a maintenance officer to a request (Admin only)",
+        "description": "Assigns the request to an officer, updates status to 'assigned', logs the action, and triggers an email alert to the officer.",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AssignRequestBody" } } }
+        },
+        "responses": {
+          "201": { "description": "Assigned successfully" },
+          "403": { "description": "Forbidden — Admin only" }
+        }
+      }
+    },
+    "/status-logs": {
+      "post": {
+        "tags": ["Status Logs"],
+        "summary": "Update request status and log the change (Officer/Admin only)",
+        "description": "Updates the request status, writes an audit log entry, and triggers a status update email to the requester.",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StatusLogBody" } } }
+        },
+        "responses": {
+          "201": { "description": "Status updated and logged" },
+          "400": { "description": "Validation error" },
+          "403": { "description": "Forbidden" }
+        }
+      },
+      "get": {
+        "tags": ["Status Logs"],
+        "summary": "Get audit trail for a request",
+        "parameters": [{ "name": "request_id", "in": "query", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+        "responses": {
+          "200": { "description": "Audit trail entries" }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "List maintenance officers (Admin only)",
+        "description": "Returns all active maintenance officer profiles for use in the assignment dropdown.",
+        "responses": {
+          "200": { "description": "List of officers", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/Profile" } } } } } } },
+          "403": { "description": "Forbidden — Admin only" }
+        }
+      }
+    },
+    "/export": {
+      "get": {
+        "tags": ["Export"],
+        "summary": "Export requests to CSV (Admin only)",
+        "description": "Generates and streams a CSV file of all service requests with optional filters.",
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "from", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "to", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": { "description": "CSV file download", "content": { "text/csv": { "schema": { "type": "string" } } } },
+          "403": { "description": "Forbidden — Admin only" }
+        }
+      }
+    }
+  }
+}

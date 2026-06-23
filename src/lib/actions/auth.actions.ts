@@ -26,7 +26,7 @@ export async function signInAction(formData: FormData) {
 
   const result = signInSchema.safeParse(raw);
   if (!result.success) {
-    return { error: result.error.errors[0].message };
+    return { error: result.error.issues[0].message };
   }
 
   const { data, error } = await supabase.auth.signInWithPassword(result.data);
@@ -35,17 +35,18 @@ export async function signInAction(formData: FormData) {
     return { error: 'Invalid email or password. Please try again.' };
   }
 
-  // Fetch role for redirect
+  // Fetch role_id for redirect
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role_id, roles(name)')
+    .select('role_id')
     .eq('id', data.user.id)
     .single();
 
-  const roleName = (profile?.roles as { name: Role } | null)?.name ?? 'student';
+  const roleId = profile?.role_id ?? 1;
+  const ROLE_ROUTES_BY_ID: Record<number, string> = { 1: '/student', 2: '/officer', 3: '/admin' };
 
   revalidatePath('/', 'layout');
-  redirect(ROLE_ROUTES[roleName]);
+  redirect(ROLE_ROUTES_BY_ID[roleId] ?? '/student');
 }
 
 // -----------------------------------------------
@@ -64,7 +65,7 @@ export async function signUpAction(formData: FormData) {
 
   const result = signUpSchema.safeParse(raw);
   if (!result.success) {
-    return { error: result.error.errors[0].message };
+    return { error: result.error.issues[0].message };
   }
 
   const { data, error } = await supabase.auth.signUp({
