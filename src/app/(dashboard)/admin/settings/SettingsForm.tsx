@@ -24,7 +24,7 @@ export default function SettingsForm({ settings }: { settings: SiteSettings | nu
   };
 
   return (
-    <form action={handleSave} className="space-y-6 max-w-2xl bg-white p-6 rounded-2xl shadow-card border border-border">
+    <form action={handleSave} className="space-y-6 max-w-2xl">
       
       {/* Site Logo */}
       <div className="space-y-3">

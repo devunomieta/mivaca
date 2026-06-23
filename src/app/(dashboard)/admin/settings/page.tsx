@@ -11,15 +11,19 @@ export default async function AdminSettingsPage() {
   const settings = await getSiteSettingsAction();
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-brand-navy tracking-tight">Site Settings</h1>
-        <p className="text-brand-gray text-sm">
-          Update global platform assets, branding, and images.
-        </p>
+    <div className="animate-fade-in">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Site Settings</h1>
+          <p className="text-brand-gray text-sm mt-0.5">
+            Update global platform assets, branding, and images.
+          </p>
+        </div>
       </div>
 
-      <SettingsForm settings={settings} />
+      <div className="bg-white rounded-xl border border-border shadow-card p-6">
+        <SettingsForm settings={settings} />
+      </div>
     </div>
   );
 }

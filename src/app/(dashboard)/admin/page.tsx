@@ -76,13 +76,13 @@ export default async function AdminDashboardPage() {
         <StatsCard title="Total Requests" value={stats.total} icon={ClipboardList} />
         <StatsCard title="Pending" value={stats.pending} icon={Clock} iconColor="text-amber-500" />
         <StatsCard title="In Progress" value={stats.in_progress} icon={AlertTriangle} iconColor="text-purple-500" />
-        <StatsCard title="Resolution Rate" value={`${resolutionRate}%`} icon={TrendingUp} iconColor="text-emerald-500" />
+        <StatsCard title="Completed" value={stats.completed} icon={CheckCircle2} iconColor="text-emerald-500" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+        <StatsCard title="Resolution Rate" value={`${resolutionRate}%`} icon={TrendingUp} iconColor="text-emerald-500" />
         <StatsCard title="Total Users" value={totalUsers ?? 0} icon={Users} iconColor="text-blue-500" />
         <StatsCard title="Maintenance Officers" value={officerCount ?? 0} icon={Users} iconColor="text-brand-coral" />
-        <StatsCard title="Completed" value={stats.completed} icon={CheckCircle2} iconColor="text-emerald-500" />
       </div>
 
       {/* Pending requests needing assignment */}
