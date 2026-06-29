@@ -114,9 +114,15 @@ export default function NewRequestPage() {
   }
 
   function next() {
-    if (validate()) setStep((s) => Math.min(s + 1, 3));
+    if (validate()) {
+      setStep((s) => Math.min(s + 1, 3));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
-  function back() { setStep((s) => Math.max(s - 1, 0)); }
+  function back() {
+    setStep((s) => Math.max(s - 1, 0));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   async function handleSubmit() {
     setSubmitting(true);
@@ -167,7 +173,7 @@ export default function NewRequestPage() {
             <h2 className="text-lg font-semibold text-brand-navy mb-1">Select a Category</h2>
             <p className="text-brand-gray text-sm mb-6">What type of maintenance issue are you reporting?</p>
             {errors.category_id && <p className="text-red-600 text-sm mb-4">{errors.category_id}</p>}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {CATEGORIES.map((cat) => {
                 const Icon = cat.icon;
                 const selected = form.category_id === cat.id;

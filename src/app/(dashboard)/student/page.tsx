@@ -93,9 +93,9 @@ export default async function StudentDashboardPage() {
               <li key={req.id}>
                 <Link
                   href={`/student/requests/${generateRequestSlug(req)}`}
-                  className="flex items-center justify-between px-6 py-4 hover:bg-brand-canvas transition-colors group"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between px-6 py-4 hover:bg-brand-canvas transition-colors group gap-3"
                 >
-                  <div className="flex-1 min-w-0 mr-4">
+                  <div className="flex-1 min-w-0 sm:mr-4">
                     <p className="font-medium text-brand-navy text-sm truncate group-hover:text-brand-coral transition-colors">
                       {req.title}
                     </p>

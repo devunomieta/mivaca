@@ -56,7 +56,7 @@ export default async function AdminDashboardPage() {
           <h1 className="page-title">Admin Dashboard</h1>
           <p className="text-brand-gray text-sm mt-0.5">University-wide maintenance overview</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto mt-4 sm:mt-0">
           <Link href="/admin/requests">
             <Button variant="outline" className="h-10 gap-2 border-border hover:border-brand-coral hover:text-brand-coral">
               <ClipboardList className="w-4 h-4" />
@@ -89,8 +89,8 @@ export default async function AdminDashboardPage() {
       <div className="bg-white rounded-xl border border-border shadow-card">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h2 className="font-semibold text-brand-navy">Unassigned Requests</h2>
-          <Link href="/admin/requests?status=pending" className="text-sm text-brand-coral hover:underline font-medium">
-            View all pending
+          <Link href="/admin/requests?status=pending" className="text-sm text-brand-coral hover:underline font-medium shrink-0 ml-4">
+            View all
           </Link>
         </div>
 
@@ -105,8 +105,8 @@ export default async function AdminDashboardPage() {
             {recentPending.map((req: any) => (
               <li key={req.id}>
                 <Link href={`/admin/requests?highlight=${req.id}`}
-                  className="flex items-center justify-between px-6 py-4 hover:bg-brand-canvas transition-colors group">
-                  <div className="flex-1 min-w-0">
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 hover:bg-brand-canvas transition-colors group">
+                  <div className="flex-1 min-w-0 sm:mr-4">
                     <p className="font-medium text-brand-navy text-sm truncate group-hover:text-brand-coral transition-colors">
                       {req.title}
                     </p>
@@ -114,7 +114,7 @@ export default async function AdminDashboardPage() {
                       {req.request_categories?.name} &middot; {req.profiles?.full_name}
                     </p>
                   </div>
-                  <span className={`text-xs font-semibold px-2 py-1 rounded-full flex-shrink-0 ml-4 ${
+                  <span className={`text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full shrink-0 self-start sm:self-center ${
                     req.priority === 'critical' ? 'bg-red-100 text-red-700' :
                     req.priority === 'high' ? 'bg-orange-100 text-orange-700' :
                     req.priority === 'medium' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'

@@ -20,9 +20,9 @@ export default async function AdminSettingsPage() {
       </div>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="bg-brand-canvas/50 border border-border p-1 rounded-xl mb-8 w-full sm:w-auto inline-flex">
-          <TabsTrigger value="general" className="rounded-lg px-6 data-[state=active]:bg-white data-[state=active]:text-brand-coral data-[state=active]:shadow-sm">General & Branding</TabsTrigger>
-          <TabsTrigger value="categories" className="rounded-lg px-6 data-[state=active]:bg-white data-[state=active]:text-brand-coral data-[state=active]:shadow-sm">Request Categories</TabsTrigger>
+        <TabsList className="bg-brand-canvas/50 border border-border p-1 rounded-xl mb-8 w-full sm:w-auto flex flex-col sm:inline-flex sm:flex-row h-auto">
+          <TabsTrigger value="general" className="w-full sm:w-auto rounded-lg px-6 py-2 data-[state=active]:bg-white data-[state=active]:text-brand-coral data-[state=active]:shadow-sm">General & Branding</TabsTrigger>
+          <TabsTrigger value="categories" className="w-full sm:w-auto rounded-lg px-6 py-2 data-[state=active]:bg-white data-[state=active]:text-brand-coral data-[state=active]:shadow-sm">Request Categories</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="mt-0 outline-none animate-fade-in">

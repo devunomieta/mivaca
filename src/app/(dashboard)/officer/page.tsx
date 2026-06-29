@@ -93,12 +93,14 @@ export default async function OfficerDashboardPage() {
                       <p className="font-semibold text-brand-navy text-sm group-hover:text-brand-coral transition-colors truncate">
                         {req.title}
                       </p>
-                      <div className="flex items-center gap-4 mt-1.5 text-xs text-brand-gray">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1.5 text-xs text-brand-gray">
                         <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />{req.location}
+                          <MapPin className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate max-w-[200px] sm:max-w-none">{req.location}</span>
                         </span>
                         <span className="flex items-center gap-1">
-                          <User className="w-3 h-3" />{req.profiles?.full_name}
+                          <User className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate">{req.profiles?.full_name}</span>
                         </span>
                       </div>
                       <p className="text-xs text-brand-gray mt-1">

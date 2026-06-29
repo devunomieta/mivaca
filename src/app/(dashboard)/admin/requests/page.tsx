@@ -310,9 +310,9 @@ export default function AdminRequestsPage() {
 
       {/* View Request Details Modal */}
       <Dialog open={!!viewingRequest} onOpenChange={(open) => !open && setViewingRequest(null)}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl">
           <DialogHeader>
-            <DialogTitle className="text-brand-navy flex items-center gap-3">
+            <DialogTitle className="text-brand-navy flex flex-wrap items-center gap-2 sm:gap-3">
               Request Details
               {viewingRequest && <StatusBadge status={viewingRequest.status} />}
               {viewingRequest && <PriorityBadge priority={viewingRequest.priority} />}
@@ -322,25 +322,27 @@ export default function AdminRequestsPage() {
             <div className="space-y-6 py-4">
               <div>
                 <h3 className="text-lg font-semibold text-brand-navy">{viewingRequest.title}</h3>
-                <p className="text-sm text-brand-gray mt-1 flex items-center gap-2">
-                  <span className="font-medium text-brand-navy">Location:</span> {(viewingRequest as any).location}
-                </p>
-                <p className="text-sm text-brand-gray mt-1 flex items-center gap-2">
-                  <span className="font-medium text-brand-navy">Category:</span> {(viewingRequest as any).request_categories?.name}
-                </p>
+                <div className="text-sm text-brand-gray mt-2 flex items-start gap-2">
+                  <span className="font-medium text-brand-navy shrink-0">Location:</span> 
+                  <span className="leading-tight pt-0.5">{(viewingRequest as any).location}</span>
+                </div>
+                <div className="text-sm text-brand-gray mt-2 flex items-start gap-2">
+                  <span className="font-medium text-brand-navy shrink-0">Category:</span> 
+                  <span className="leading-tight pt-0.5">{(viewingRequest as any).request_categories?.name}</span>
+                </div>
               </div>
 
               <div className="bg-brand-canvas rounded-xl p-4 text-sm text-brand-navy whitespace-pre-wrap border border-border">
                 {viewingRequest.description}
               </div>
 
-              <div className="grid grid-cols-2 gap-4 border-t border-border pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-border pt-4">
                 <div>
                   <p className="text-xs font-semibold text-brand-gray uppercase tracking-wider mb-2">Requester</p>
-                  <p className="text-sm font-medium text-brand-navy">{(viewingRequest as any).profiles?.full_name}</p>
-                  <p className="text-xs text-brand-gray">{(viewingRequest as any).profiles?.email}</p>
+                  <p className="text-sm font-medium text-brand-navy truncate">{(viewingRequest as any).profiles?.full_name}</p>
+                  <p className="text-xs text-brand-gray truncate">{(viewingRequest as any).profiles?.email}</p>
                   {(viewingRequest as any).profiles?.department && (
-                    <p className="text-xs text-brand-gray">{(viewingRequest as any).profiles?.department}</p>
+                    <p className="text-xs text-brand-gray line-clamp-2">{(viewingRequest as any).profiles?.department}</p>
                   )}
                 </div>
                 <div>
@@ -378,7 +380,7 @@ export default function AdminRequestsPage() {
 
       {/* Assign Officer Modal */}
       <Dialog open={!!assigning} onOpenChange={(open) => !open && setAssigning(null)}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto rounded-xl">
           <DialogHeader>
             <DialogTitle className="text-brand-navy">
               {(Array.isArray(assigning?.assignments) ? assigning?.assignments[0] : assigning?.assignments) ? 'Reassign Maintenance Officer' : 'Assign Maintenance Officer'}

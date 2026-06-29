@@ -188,43 +188,47 @@ export function RequestDetailsView({ slug, role }: { slug: string; role: 'studen
   return (
     <div className="animate-fade-in max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" className="-ml-2 text-brand-gray hover:text-brand-navy" onClick={() => router.back()}>
+      <div className="flex flex-wrap items-center justify-between gap-y-4">
+        <Button variant="ghost" className="-ml-2 text-brand-gray hover:text-brand-navy shrink-0" onClick={() => router.back()}>
           <ChevronLeft className="w-4 h-4 mr-1" />
           Back
         </Button>
 
         {/* Officer Action Controls */}
         {role === 'maintenance_officer' && request.status === 'assigned' && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto mt-2 sm:mt-0">
             <Button 
               variant="outline" 
-              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+              className="flex-1 sm:flex-none border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
               onClick={() => setIsRejectModalOpen(true)}
             >
-              <XCircle className="w-4 h-4 mr-2" />
-              Reject Task
+              <XCircle className="w-4 h-4 sm:mr-2 shrink-0" />
+              <span className="hidden sm:inline">Reject Task</span>
+              <span className="sm:hidden ml-1">Reject</span>
             </Button>
             <Button 
-              className="bg-brand-coral hover:bg-brand-coral-hover text-white"
+              className="flex-1 sm:flex-none bg-brand-coral hover:bg-brand-coral-hover text-white"
               onClick={() => updateStatus('in_progress', 'Officer accepted the task and is working on it.')}
               disabled={isProcessing}
             >
-              <PlayCircle className="w-4 h-4 mr-2" />
-              Accept & Start
+              <PlayCircle className="w-4 h-4 sm:mr-2 shrink-0" />
+              <span className="hidden sm:inline">Accept & Start</span>
+              <span className="sm:hidden ml-1">Accept</span>
             </Button>
           </div>
         )}
         
         {role === 'maintenance_officer' && request.status === 'in_progress' && (
-          <Button 
-            className="bg-green-600 hover:bg-green-700 text-white"
-            onClick={() => updateStatus('completed', 'Task has been completed by the officer.')}
-            disabled={isProcessing}
-          >
-            <CheckCircle className="w-4 h-4 mr-2" />
-            Mark as Completed
-          </Button>
+          <div className="w-full sm:w-auto mt-2 sm:mt-0">
+            <Button 
+              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => updateStatus('completed', 'Task has been completed by the officer.')}
+              disabled={isProcessing}
+            >
+              <CheckCircle className="w-4 h-4 mr-2 shrink-0" />
+              Mark as Completed
+            </Button>
+          </div>
         )}
       </div>
 
@@ -336,25 +340,25 @@ export function RequestDetailsView({ slug, role }: { slug: string; role: 'studen
                   </div>
                 )}
 
-                <div className="flex items-center justify-between pt-2">
-                  <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+                  <div className="flex flex-wrap items-center gap-4">
                     <div {...getRootProps()}>
                       <input {...getInputProps()} />
                       <Button type="button" variant="outline" size="sm" className="h-9 gap-2 text-brand-gray" disabled={uploadedFiles.length >= 5 || uploadingFiles}>
-                        {uploadingFiles ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
+                        {uploadingFiles ? <Loader2 className="w-4 h-4 animate-spin shrink-0" /> : <Paperclip className="w-4 h-4 shrink-0" />}
                         <span>Attach ({uploadedFiles.length}/5)</span>
                       </Button>
                     </div>
 
                     {(role === 'maintenance_officer' || role === 'admin') && (
-                      <label className="flex items-center gap-2 text-sm text-brand-gray cursor-pointer">
+                      <label className="flex items-center gap-2 text-sm text-brand-gray cursor-pointer whitespace-nowrap">
                         <input 
                           type="checkbox" 
                           checked={isInternal} 
                           onChange={(e) => setIsInternal(e.target.checked)}
                           className="rounded border-border text-brand-coral focus:ring-brand-coral"
                         />
-                        <Lock className="w-3.5 h-3.5" />
+                        <Lock className="w-3.5 h-3.5 shrink-0" />
                         Internal Note
                       </label>
                     )}
@@ -363,9 +367,9 @@ export function RequestDetailsView({ slug, role }: { slug: string; role: 'studen
                   <Button 
                     onClick={handlePostComment} 
                     disabled={isPosting || (!newComment.trim() && uploadedFiles.length === 0)}
-                    className={isInternal ? 'bg-amber-500 hover:bg-amber-600' : 'bg-brand-coral hover:bg-brand-coral-hover'}
+                    className={`w-full sm:w-auto ${isInternal ? 'bg-amber-500 hover:bg-amber-600' : 'bg-brand-coral hover:bg-brand-coral-hover'}`}
                   >
-                    <Send className="w-4 h-4 mr-2" />
+                    <Send className="w-4 h-4 mr-2 shrink-0" />
                     {isInternal ? 'Post Note' : 'Send'}
                   </Button>
                 </div>

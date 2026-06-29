@@ -24,8 +24,6 @@ export default async function AuthLogo() {
           <span className="text-xs tracking-widest mt-1 opacity-70">OPEN UNIVERSITY</span>
         </div>
       )}
-      <h2 className="text-[28px] font-bold text-[#1A2E44] mb-2">Log In</h2>
-      <p className="text-[#8492A6] text-sm font-medium">Enter your account details</p>
     </div>
   );
 }

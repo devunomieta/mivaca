@@ -19,7 +19,10 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="w-full animate-fade-in">
+    <div className="w-full animate-fade-in flex flex-col items-center">
+      <h2 className="text-[28px] font-bold text-[#1A2E44] mb-2 text-center">Create Account</h2>
+      <p className="text-[#8492A6] text-sm font-medium text-center mb-8">Fill in your details to get started</p>
+
       {state?.error && (
         <div
           id="register-error"

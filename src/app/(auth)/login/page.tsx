@@ -28,7 +28,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full animate-fade-in">
+    <div className="w-full animate-fade-in flex flex-col items-center">
+      <h2 className="text-[28px] font-bold text-[#1A2E44] mb-2 text-center">Log In</h2>
+      <p className="text-[#8492A6] text-sm font-medium text-center mb-8">Enter your account details</p>
+
       {state?.error && (
         <div
           id="login-error"
